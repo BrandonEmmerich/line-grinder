@@ -1,15 +1,20 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import pendulum
 import sys
 sys.path.append('..')
 
 from sportsbooks import (
     pinnacle,
     draftkings,
-    pointsbet
+    pointsbet,
+    caesers
 )
 
 from calculator import Calculator
+
+def right_now():
+    return str(pendulum.now()).split('.')[0].replace('T', ' ')
 
 def main():
 
@@ -31,6 +36,10 @@ def main():
     print('Getting PointsBet Lines...')
     
     pb.get_data()
+    
+    print('Getting Caesers Lines...')
+    czr = caesers.Caesers()
+    czr.get_data()
 
     print('Returning ROI Calculations:')
 
@@ -46,6 +55,12 @@ def main():
                 .rename(columns={'odds_decimal': 'PointsBet'})
             )
         )
+        .merge(
+            (
+                czr.df
+                .rename(columns={'price': 'Caesers'})
+            )
+        )   
         .melt(
             id_vars=['participant_name', 'points'],
             var_name='book',
@@ -77,6 +92,7 @@ def main():
     )
 
 
+    print(right_now())
     print(ROI.to_markdown(index=False))
 
 if __name__ == "__main__":

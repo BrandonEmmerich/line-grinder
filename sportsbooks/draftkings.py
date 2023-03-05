@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import requests
 
@@ -53,7 +54,12 @@ class DraftKings:
         self._unpack_json()
         
     def get_data(self):
-        mapping = pd.read_csv('data/mapping.csv')
+        if 'analysis' in os.getcwd():
+            mapping_path = '../data/mapping.csv'
+        else:
+            mapping_path = 'data/mapping.csv'
+            
+        mapping = pd.read_csv(mapping_path)
         
         self._get_alt_lines()
         
