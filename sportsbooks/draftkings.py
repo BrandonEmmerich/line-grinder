@@ -1,7 +1,6 @@
 import pandas as pd
 import requests
 
-## These are typically stored in a secrets style file, I can put those there to de-clutter.
 HEADERS_DRAFTKINGS = {
     'authority': 'sportsbook-us-ny.draftkings.com',
     'accept': '*/*',
