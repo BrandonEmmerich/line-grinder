@@ -40,12 +40,14 @@ class PointsBet:
         matchups = []
 
         for item in response.json()['events']:
-            row = {
-                'competition_key': item['key'],
-                'competition_name': item['name'],
-                'start_time': item['startsAt']
-            }
-            matchups.append(row)
+            if item['isLive'] == False:
+                ## Exclude in-game betting for now.
+                row = {
+                    'competition_key': item['key'],
+                    'competition_name': item['name'],
+                    'start_time': item['startsAt']
+                }
+                matchups.append(row)
 
         self.matchups = matchups
        
