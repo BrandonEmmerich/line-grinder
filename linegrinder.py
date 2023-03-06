@@ -92,19 +92,20 @@ def main():
             how='left'
         )
         .assign(
-            ROI = lambda x: round(100 * (x['Decimal Odds'] * x['vig_free_probability'] - 1),1),
-            AmericanOdds = lambda x: round(x['Decimal Odds'].apply(Calculator.convert_decimal_to_american))
+            BookPrice = lambda x: round(x['Decimal Odds'].apply(Calculator.convert_decimal_to_american)),
+            roi = lambda x: round(100 * (x['Decimal Odds'] * x['vig_free_probability'] - 1),1),
+            ROI = lambda x: x['roi'].transform(lambda s: f'{s}%'),
+            vig_free_probability = lambda x: x['vig_free_probability'].transform(lambda s: f'{round(100 * s, 1)}%')
         )
         .sort_values(
-            by='ROI',
+            by='roi',
             ascending=False
         )
-        .head(15)
+        [['participant_name', 'points', 'price', 'vig_free_probability', 'book', 'BookPrice', 'ROI']]
     )
 
-
     print(right_now())
-    print(ROI.to_markdown(index=False))
+    print(ROI.head(15).to_markdown(index=False))
 
 if __name__ == "__main__":
     main()
