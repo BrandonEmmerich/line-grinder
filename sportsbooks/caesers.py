@@ -83,22 +83,34 @@ class Caesers:
             
         mapping = pd.read_csv(mapping_path)
         
-        self.df = (
-            self.df__raw
-            .assign(
-                home_team = lambda x: x['event_name'].transform(lambda s: s.split('| |at| |')[1].replace('|', '')),
-                away_team = lambda x: x['event_name'].transform(lambda s: s.split('| |at| |')[0].replace('|', '')),
+        if self.df__raw.shape == (0,0):
+            ## Sometimes there are no alternate lines for Caesers
+            print('No alternate lines for Caesers yet.')
+            self.df = pd.DataFrame({
+                    'participant_name': [],
+                    'points': [],
+                    'price': []
+                    }
+                )
 
-                label_caesers = lambda x: np.where(x['designation'] == 'home', x['home_team'], x['away_team']),
-                price = lambda x: x['decimalOdds'],
-                
-                ## Caesers quotes lines old-school, points is quoting the home team.
-                points = lambda x: np.where(x['designation'] == 'home', x['points'], x['points'] * -1)
-                    )
-            .merge(
-                mapping,
-                on='label_caesers',
-                how='left'
+        else:
+        
+            self.df = (
+                self.df__raw
+                .assign(
+                    home_team = lambda x: x['event_name'].transform(lambda s: s.split('| |at| |')[1].replace('|', '')),
+                    away_team = lambda x: x['event_name'].transform(lambda s: s.split('| |at| |')[0].replace('|', '')),
+
+                    label_caesers = lambda x: np.where(x['designation'] == 'home', x['home_team'], x['away_team']),
+                    price = lambda x: x['decimalOdds'],
+
+                    ## Caesers quotes lines old-school, points is quoting the home team.
+                    points = lambda x: np.where(x['designation'] == 'home', x['points'], x['points'] * -1)
+                        )
+                .merge(
+                    mapping,
+                    on='label_caesers',
+                    how='left'
+                )
+                [['participant_name', 'points', 'price']]
             )
-            [['participant_name', 'points', 'price']]
-        )
