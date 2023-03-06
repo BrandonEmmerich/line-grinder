@@ -9,7 +9,8 @@ from sportsbooks import (
     draftkings,
     pointsbet,
     caesers,
-    betmgm
+    betmgm,
+    wynn
 )
 
 from calculator import Calculator
@@ -46,6 +47,10 @@ def main():
     mgm = betmgm.BetMGM()
     mgm.get_data()
 
+    print('Getting Wynn Lines...')
+    winny = wynn.Wynn()
+    winny.get_data()
+    
     print('Returning ROI Calculations:')
 
     retail = (
@@ -54,24 +59,25 @@ def main():
             DraftKings = lambda x: x['price'].apply(Calculator.convert_american_to_decimal)
         )
         [['participant_name', 'points', 'DraftKings']]
-        .merge(
-            (
-                pb.df
-                .rename(columns={'odds_decimal': 'PointsBet'})
-            )
+         .merge(
+            pb.df.rename(columns={'odds_decimal': 'PointsBet'}),
+            how='outer',
+            on=['participant_name', 'points']
         )
         .merge(
-            (
-                czr.df
-                .rename(columns={'price': 'Caesers'})
-            )
-        )
+            czr.df.rename(columns={'price': 'Caesers'}),
+            how='outer',
+            on=['participant_name', 'points']
+        ) 
         .merge(
-            (
-                mgm.df
-                .rename(columns={'price': 'BetMGM'})
-            )
-        )   
+            mgm.df.rename(columns={'price': 'BetMGM'}),
+            how='outer',
+            on=['participant_name', 'points']
+        ) 
+        .merge(
+            winny.df.rename(columns={'price': 'Wynn'}), 
+            how='outer', 
+            on=['participant_name', 'points'])
         .melt(
             id_vars=['participant_name', 'points'],
             var_name='book',
