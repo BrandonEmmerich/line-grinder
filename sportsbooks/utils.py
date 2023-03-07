@@ -25,3 +25,16 @@ def clean_name(name):
 
 def clean_points(points):
     return float(points.replace('+', ''))
+
+def empty_dataframe():
+    '''
+    Return an empty data frame to use as a placeholder when the markets are empty.
+    '''
+    empty = pd.DataFrame({
+            'participant_name': [],
+            'points': [],
+            'price': []
+            }
+        )
+    
+    return empty

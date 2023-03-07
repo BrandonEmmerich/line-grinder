@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import requests
 
+from sportsbooks import utils
+
 HEADERS_POINTSBET = {
     'authority': 'api.ny.pointsbet.com',
     'accept': 'application/json, text/plain, */*',
@@ -52,24 +54,8 @@ class PointsBet:
 
         self.matchups = matchups
        
-    @staticmethod
-    def clean_pointsbet_name(name):
-        '''
-        PointsBet returns names that look like this: Dallas Mavericks -9.5
-        We want names that look like this: Dallas Mavericks
-        '''
-        name = name.split(' -')[0]
-        name = name.split(' +')[0]
-
-        return name
         
     def get_data(self):
-        if 'analysis' in os.getcwd():
-            mapping_path = '../data/mapping.csv'
-        else:
-            mapping_path = 'data/mapping.csv'
-            
-        mapping = pd.read_csv(mapping_path)
         
         self._get_matchups()
         self._get_alt_lines()
@@ -77,10 +63,10 @@ class PointsBet:
         self.df = (
             self.df__raw
             .assign(
-                label_pointsbet = lambda x: x['name'].apply(self.clean_pointsbet_name)
+                label_pointsbet = lambda x: x['name'].apply(utils.clean_name)
             )
             .merge(
-                mapping,
+                utils.get_mapping(),
                 on='label_pointsbet',
             )
             .assign(

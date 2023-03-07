@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import requests
 
+from sportsbooks import utils
+
 HEADERS_CAESERS = {
     'authority': 'www.williamhill.com',
     'accept': '*/*',
@@ -75,23 +77,10 @@ class Caesers:
         self._get_response()
         self._parse_lines()
         
-        if 'analysis' in os.getcwd():
-            mapping_path = '../data/mapping.csv'
-        
-        else:
-            mapping_path = 'data/mapping.csv'
-            
-        mapping = pd.read_csv(mapping_path)
-        
         if self.df__raw.shape == (0,0):
             ## Sometimes there are no alternate lines for Caesers
             print('No alternate lines for Caesers yet.')
-            self.df = pd.DataFrame({
-                    'participant_name': [],
-                    'points': [],
-                    'price': []
-                    }
-                )
+            self.df = utils.empty_dataframe()
 
         else:
         
@@ -105,10 +94,14 @@ class Caesers:
                     price = lambda x: x['decimalOdds'],
 
                     ## Caesers quotes lines old-school, points is quoting the home team.
-                    points = lambda x: np.where(x['designation'] == 'home', x['points'], x['points'] * -1)
+                    points = lambda x: np.where(
+                        x['designation'] == 'home', 
+                        x['points'], 
+                        x['points'] * -1
                         )
+                )
                 .merge(
-                    mapping,
+                    utils.get_mapping(),
                     on='label_caesers',
                     how='left'
                 )

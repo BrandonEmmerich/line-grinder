@@ -115,8 +115,4 @@ class Wynn:
             )
             [['participant_name', 'points', 'price']]
         )
-
-
-        
-
         

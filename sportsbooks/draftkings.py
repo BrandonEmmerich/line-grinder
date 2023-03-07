@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import requests
 
+from sportsbooks import utils
+
 HEADERS_DRAFTKINGS = {
     'authority': 'sportsbook-us-ny.draftkings.com',
     'accept': '*/*',
@@ -54,19 +56,14 @@ class DraftKings:
         self._unpack_json()
         
     def get_data(self):
-        if 'analysis' in os.getcwd():
-            mapping_path = '../data/mapping.csv'
-        else:
-            mapping_path = 'data/mapping.csv'
-            
-        mapping = pd.read_csv(mapping_path)
-        
-        self._get_alt_lines()
+
+        self._hit_endpoints()
+        self._unpack_json()
         
         self.df = (
             self.df__raw
             .merge(
-                mapping,
+                utils.get_mapping(),
                 left_on='label',
                 right_on='label_draftkings'
             )
