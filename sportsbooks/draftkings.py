@@ -40,16 +40,22 @@ class DraftKings:
         )
 
     def _unpack_json(self):
-        games = self.response__alt_lines.json()['eventGroup']['offerCategories'][0]['offerSubcategoryDescriptors'][1]['offerSubcategory']['offers']
+        if not self.response__alt_lines.json().get('eventGroup'):
+            print('No alt lines for DraftKings.')
+            self.df__raw = utils.empty_dataframe
+            
+        else:
+        
+            games = self.response__alt_lines.json()['eventGroup']['offerCategories'][0]['offerSubcategoryDescriptors'][1]['offerSubcategory']['offers']
 
-        lines = []
+            lines = []
 
-        for game in games:
-            outcomes = game[0]['outcomes']
-            for outcome in outcomes:
-                lines.append(outcome)
+            for game in games:
+                outcomes = game[0]['outcomes']
+                for outcome in outcomes:
+                    lines.append(outcome)
 
-        self.df__raw = pd.DataFrame(lines)
+            self.df__raw = pd.DataFrame(lines)
         
     def _get_alt_lines(self):
         self._hit_endpoints()

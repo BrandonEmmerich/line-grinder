@@ -93,26 +93,30 @@ class Wynn:
             self._parse_spreads(self, response=response)
             
     def get_data(self):
-        self._get_matches()
-        self._get_lines()
-        
-        self.df = (
-            pd.DataFrame(self.lines)
-            .assign(
-                price = lambda x: x['decimalOdds'],
-             )
-            .merge(
-                utils.get_mapping(),
-                on='label_wynn',
-                how='left'
-            )
-            .assign(
-                points = lambda x: np.where(
-                    x['side'] == 'Home',
-                    x['points'],
-                    x['points'] * -1
+        try:
+            self._get_matches()
+            self._get_lines()
+
+            self.df = (
+                pd.DataFrame(self.lines)
+                .assign(
+                    price = lambda x: x['decimalOdds'],
+                 )
+                .merge(
+                    utils.get_mapping(),
+                    on='label_wynn',
+                    how='left'
                 )
+                .assign(
+                    points = lambda x: np.where(
+                        x['side'] == 'Home',
+                        x['points'],
+                        x['points'] * -1
+                    )
+                )
+                [['participant_name', 'points', 'price']]
             )
-            [['participant_name', 'points', 'price']]
-        )
+        except Exception as e:
+            print(f'Failure in Wynn Data: {e}')
+            self.df = utils.empty_dataframe()
         

@@ -60,35 +60,46 @@ class PointsBet:
         self._get_matchups()
         self._get_alt_lines()
         
-        self.df = (
-            self.df__raw
-            .assign(
-                label_pointsbet = lambda x: x['name'].apply(utils.clean_name)
+        if self.df__raw.shape == (0,0):
+            ## Sometimes there are no alternate lines for Caesers
+            print('No alternate lines for PointsBet.')
+            self.df = utils.empty_dataframe()
+        
+        else:
+        
+            self.df = (
+                self.df__raw
+                .assign(
+                    label_pointsbet = lambda x: x['name'].apply(utils.clean_name)
+                )
+                .merge(
+                    utils.get_mapping(),
+                    on='label_pointsbet',
+                )
+                .assign(
+                    odds_decimal = lambda x: x['price'],
+                )
+                [['participant_name', 'points', 'odds_decimal']]
             )
-            .merge(
-                utils.get_mapping(),
-                on='label_pointsbet',
-            )
-            .assign(
-                odds_decimal = lambda x: x['price'],
-            )
-            [['participant_name', 'points', 'odds_decimal']]
-        )
         
     def _get_alt_lines(self):
         lines = []
         
         for matchup in self.matchups:
-            matchup_id = matchup['competition_key']
-            url = f'https://api.ny.pointsbet.com/api/mes/v3/events/{matchup_id}'
-            response = self._get(url)
-            
+            try:
+                matchup_id = matchup['competition_key']
+                url = f'https://api.ny.pointsbet.com/api/mes/v3/events/{matchup_id}'
+                response = self._get(url)
 
-            for market in response.json()['fixedOddsMarkets']:
-                if market['eventName'] == 'Pick Your Own Line':
-                    outcomes = market['outcomes']
-                    for outcome in outcomes:
-                        lines.append(outcome)
+
+                for market in response.json()['fixedOddsMarkets']:
+                    if market['eventName'] == 'Pick Your Own Line':
+                        outcomes = market['outcomes']
+                        for outcome in outcomes:
+                            lines.append(outcome)
+            
+            except Exception as e:
+                print(f'Error with PointsBet: {e}')
                         
         self.df__raw = pd.DataFrame(lines)
 

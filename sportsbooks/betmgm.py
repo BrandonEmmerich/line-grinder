@@ -46,33 +46,39 @@ class BetMGM:
         lines = []
         
         # This is where the game information are stored
-        fixtures = self.response.json()['widgets'][3]['payload']['items'][0]['activeChildren'][0]['payload']['fixtures']
+        if not self.response.json()['widgets'][3]['payload'].get('items'):
+            print('No data for BetMGM')
+            self.lines = []
+            
+        else:
+        
+            fixtures = self.response.json()['widgets'][3]['payload']['items'][0]['activeChildren'][0]['payload']['fixtures']
 
-        for fixture in fixtures:
-            row = {
-                'fixture_id': fixture['id'],
-                'fixture_name': fixture['name']['value'],
-            }
+            for fixture in fixtures:
+                row = {
+                    'fixture_id': fixture['id'],
+                    'fixture_name': fixture['name']['value'],
+                }
 
-            spreads = [
-                game for game in fixture['games'] 
-                if game['name']['value'] == 'Spread'
-            ]
+                spreads = [
+                    game for game in fixture['games'] 
+                    if game['name']['value'] == 'Spread'
+                ]
 
-            for spread in spreads:
-                results = spread['results']
+                for spread in spreads:
+                    results = spread['results']
 
-                for result in results:
-                    details = {
-                        'result_name': result['name']['value'],
-                        'points': result['attr'],
-                        'american_odds': result['americanOdds'],
-                        'decimal_odds': result['odds']
-                    }
+                    for result in results:
+                        details = {
+                            'result_name': result['name']['value'],
+                            'points': result['attr'],
+                            'american_odds': result['americanOdds'],
+                            'decimal_odds': result['odds']
+                        }
 
-                    lines.append(dict(row, **details))
-                    
-        self.lines = lines
+                        lines.append(dict(row, **details))
+
+            self.lines = lines
 
     
     def get_data(self):
@@ -82,18 +88,22 @@ class BetMGM:
         self._get_response()
         self._get_lines()
         
-        self.df = (
-            pd.DataFrame(self.lines)
-            .assign(
-                label_betmgm = lambda x: x['result_name'].apply(utils.clean_name),
-                price = lambda x: x['decimal_odds'],
-                points = lambda x: x['points'].apply(utils.clean_points),
-             )
-            .merge(
-                utils.get_mapping(),
-                on='label_betmgm',
-                how='left'
-            )
-            [['participant_name', 'points', 'price']]
-        )
+        if self.lines == []:
+            self.df = utils.empty_dataframe()
+            
+        else:
         
+            self.df = (
+                pd.DataFrame(self.lines)
+                .assign(
+                    label_betmgm = lambda x: x['result_name'].apply(utils.clean_name),
+                    price = lambda x: x['decimal_odds'],
+                    points = lambda x: x['points'].apply(utils.clean_points),
+                 )
+                .merge(
+                    utils.get_mapping(),
+                    on='label_betmgm',
+                    how='left'
+                )
+                [['participant_name', 'points', 'price']]
+            )
