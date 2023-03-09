@@ -47,9 +47,6 @@ def main():
     mgm = betmgm.BetMGM()
     mgm.get_data()
 
-    print('Getting Wynn Lines...')
-    winny = wynn.Wynn()
-    winny.get_data()
     
     print('Returning ROI Calculations:')
 
@@ -74,10 +71,6 @@ def main():
             how='outer',
             on=['participant_name', 'points']
         ) 
-        .merge(
-            winny.df.rename(columns={'price': 'Wynn'}), 
-            how='outer', 
-            on=['participant_name', 'points'])
         .melt(
             id_vars=['participant_name', 'points'],
             var_name='book',
