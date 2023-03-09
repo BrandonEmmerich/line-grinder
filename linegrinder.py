@@ -49,8 +49,17 @@ def main():
 
     
     print('Returning ROI Calculations:')
+    
+    pricing_spine = (
+        pinny.df
+        .assign(
+            raw_probability = lambda x: x['price'].apply(Calculator.get_implied_probability),
+            vig_free_probability = lambda x: x['raw_probability'] / x.groupby(['matchup_id', 'key'])['raw_probability'].transform('sum')
+        )
+        [['participant_name', 'points', 'price', 'vig_free_probability']]
+    )
 
-    retail = (
+    retail_books = (
         dkng.df
         .assign(
             DraftKings = lambda x: x['price'].apply(Calculator.convert_american_to_decimal)
@@ -79,14 +88,9 @@ def main():
     )
 
     ROI = (
-        pinny.df
-        .assign(
-            raw_probability = lambda x: x['price'].apply(Calculator.get_implied_probability),
-            vig_free_probability = lambda x: x['raw_probability'] / x.groupby(['matchup_id', 'key'])['raw_probability'].transform('sum')
-        )
-        [['participant_name', 'points', 'price', 'vig_free_probability']]
+        pricing_spine
         .merge(
-            retail,
+            retail_books,
             on=['participant_name', 'points'],
             how='left'
         )
