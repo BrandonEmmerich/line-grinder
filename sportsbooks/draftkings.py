@@ -42,7 +42,7 @@ class DraftKings:
     def _unpack_json(self):
         if not self.response__alt_lines.json().get('eventGroup'):
             print('No alt lines for DraftKings.')
-            self.df__raw = utils.empty_dataframe
+            self.df__raw = utils.empty_dataframe()
             
         else:
         
