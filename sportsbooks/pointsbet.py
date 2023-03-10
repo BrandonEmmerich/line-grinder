@@ -59,6 +59,7 @@ class PointsBet:
                     .merge(
                         utils.get_mapping(self.league), ## Map PointsBet names to master list.
                         on='label_pointsbet',
+                        how='left'
                     )
                     [['participant_name', 'points', 'price']]
                 )
