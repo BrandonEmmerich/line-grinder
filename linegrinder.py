@@ -7,6 +7,7 @@ from sportsbooks import (
     pinnacle,
     pointsbet,
     draftkings,
+    caesers,
 )
 
 from calculator import Calculator
@@ -38,6 +39,9 @@ def main():
     print('Getting DraftKings Lines...')
     dkng.get_data()
 
+    czr = caesers.Caesers(league=args.league)
+    print('Getting Caesers Lines...')
+    czr.get_data()
 
     print('Returning ROI Calculations:')
 
@@ -53,7 +57,12 @@ def main():
     retail_books = (
         pb.df.rename(columns={'price': 'PointsBet'})
         .merge(
-            dkng.df.rename(columns={'odds_decimal': 'DraftKings'}),
+            dkng.df.rename(columns={'price': 'DraftKings'}),
+            how='outer',
+            on=['participant_name', 'points']
+        )
+        .merge(
+            czr.df.rename(columns={'price': 'Caesers'}),
             how='outer',
             on=['participant_name', 'points']
         )

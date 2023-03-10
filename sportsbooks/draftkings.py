@@ -54,10 +54,10 @@ class DraftKings:
                     right_on='label_draftkings'
                 )
                 .assign(
-                    odds_decimal = lambda x: x['oddsDecimal'],
+                    price = lambda x: x['oddsDecimal'],
                     points = lambda x: x['line']
                 )
-                [['participant_name', 'points', 'odds_decimal']]
+                [['participant_name', 'points', 'price']]
             )
 
     def _get_response(self):
