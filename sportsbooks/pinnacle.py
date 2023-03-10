@@ -53,7 +53,7 @@ class Pinnacle:
                 .merge(
                     pd.DataFrame(self.prices),
                     on=['matchup_id', 'designation'],
-                    how='outer'
+                    how='inner'
                 )
             )
 
