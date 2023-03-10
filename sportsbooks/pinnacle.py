@@ -27,7 +27,6 @@ class Pinnacle:
     '''
     def __init__(self, league):
         self.league = league
-        self.response__matchups = None
         self.df__matchups = None
         self.df__straight = None
         self.df = None
@@ -39,8 +38,22 @@ class Pinnacle:
             headers=HEADERS_PINNY
         )
     
+    def _get_league_id(self):
+        '''
+        Convert human-readable league designations into appropriate Pinnacle League IDs'
+        '''
+        if self.league == 'NBA':
+            return 487
+        elif self.league == 'NCAA':
+            return 493
+    
     def _get_matchups(self):
-        url = URL_PINNY + f'{self.league}/matchups?brandId=0'
+        '''
+        Get list of games and teams on offer.
+        '''
+        league_id = self._get_league_id()
+        
+        url = URL_PINNY + f"{league_id}/matchups?brandId=0"
         
         matchups = []
         
@@ -67,6 +80,9 @@ class Pinnacle:
         
      
     def _parse_spread(self, response):
+        '''
+        Parse the point spread and prices from the Pinnacle "Straight" endpoint.
+        '''
         markets = []
         
         ##TODO: Switch logic for other market types

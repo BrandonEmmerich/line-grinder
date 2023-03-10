@@ -1,3 +1,4 @@
+import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 import pendulum
@@ -19,6 +20,12 @@ def right_now():
     return str(pendulum.now()).split('.')[0].replace('T', ' ')
 
 def main():
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--league", default="NBA")
+    args = parser.parse_args()
+    print(f"Getting data for {args.league}")
+
 
     league=487
     pinny = pinnacle.Pinnacle(league=league)
