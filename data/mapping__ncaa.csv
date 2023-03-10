@@ -1,6 +1,7 @@
 participant_name,label_pointsbet
 Air Force,Air Force Falcons
-Akron,
+Akron,Akron Zips
+Alabama,
 Alabama A&M,Alabama A&M Bulldogs
 Alcorn State,Alcorn State Braves
 Arizona,Arizona Wildcats
@@ -25,6 +26,7 @@ California,California Golden Bears
 California Baptist,California Baptist Lancers
 Canisius,
 Central Florida,Central Florida Knights
+Cincinnati,Cincinnati Bearcats
 Charlotte U,Charlotte 49ers
 Clemson,Clemson Tigers
 Cleveland State,Cleveland State Vikings
@@ -34,6 +36,7 @@ Colorado,Colorado Buffaloes
 Colorado State,Colorado State Rams
 Connecticut,Connecticut Huskies
 Coppin State,Coppin State Eagles
+Cornell,
 Creighton,Creighton Bluejays
 Davidson,Davidson Wildcats
 Dayton,Dayton Flyers
@@ -58,12 +61,15 @@ Gonzaga,Gonzaga Bulldogs
 Grambling,Grambling St Tigers
 Grand Canyon,Grand Canyon Antelopes
 Hawaii,Hawaii Rainbow Warriors
+Houston,
 Howard,Howard Bison
 Illinois,Illinois Fighting Illini
-Iona,Iowa Hawkeyes
-Iowa,
+Indiana,Indiana Hoosiers
+Iona,
+Iowa,Iowa Hawkeyes
 Iowa State,Iowa State Cyclones
 Jackson State,Jackson State Tigers
+Kentucky,Kentucky Wildcats
 Kansas,Kansas Jayhawks
 Kansas State,Kansas State Wildcats
 Kent State,Kent State Golden Flashes
@@ -75,23 +81,25 @@ Louisville,
 LSU,LSU Tigers
 Manhattan,
 Marist,
-Marquette,
+Marquette,Marquette Golden Eagles
 Maryland,Maryland Terrapins
 McNeese State,
 MD Eastern Shore,Maryland Eastern Shore Hawks
+Memphis,Memphis Tigers
 Merrimack,Merrimack Warriors
 Miami Florida,Miami-Florida Hurricanes
 Miami Ohio,Miami Ohio Redhawks
 Michigan,Michigan Wolverines
+Michigan State,Michigan State Spartans
 Middle Tennessee State,Middle Tennessee Blue Raiders
 Minnesota,Minnesota Golden Gophers
 Mississippi,
 Mississippi State,Mississippi State Bulldogs
+Missouri,Missouri Tigers
 Montana,Montana Grizzlies
 Montana State,Montana State Bobcats
 Morgan State,Morgan State Bears
 Mount St. Mary's (MD),
-,
 NC State,North Carolina State Wolfpack
 NC Wilmington,
 Nebraska,Nebraska Cornhuskers
@@ -108,6 +116,7 @@ North Texas,North Texas Mean Green
 Northern Arizona,Northern Arizona Lumberjacks
 Northern Illinois,Northern Illinois Huskies
 Northern Kentucky,Northern Kentucky Norse
+Northwestern,Northwestern Wildcats
 Northwestern State,Northwestern State Demons
 Notre Dame,Notre Dame Fighting Irish
 Ohio,Ohio Bobcats
@@ -118,10 +127,13 @@ Oklahoma State,Oklahoma State Cowboys
 Oral Roberts,
 Oregon,Oregon Ducks
 Oregon State,
+Pennsylvania,
 Penn State,Penn State Nittany Lions
 Pittsburgh,Pittsburgh Panthers
 Prairie View A&M,Prairie View A&M Panthers
+Princeton,
 Providence,Providence Friars
+Purdue,
 Quinnipiac,
 Rice,Rice Owls
 Richmond,Richmond Spiders
@@ -151,14 +163,17 @@ Stephen F. Austin,SFA Lumberjacks
 Syracuse,
 Tarleton St,Tarleton State Texans
 TCU,TCU Horned Frogs
+Temple,Temple Owls
 Tennessee,Tennessee Volunteers
 Texas,Texas Longhorns
+Texas A&M,Texas A&M Aggies
 Texas A&M Corpus Christi,Texas A&M-Corpus Christi Islanders
 ,Texas Rio Grande Valley Vaqueros
 Texas San Antonio,UTSA Roadrunners
 Texas Southern,Texas Southern Tigers
 Texas Tech,Texas Tech Red Raiders
 Toledo,Toledo Rockets
+Tulane,Tulane Green Wave
 Tulsa,Tulsa Golden Hurricane
 UAB,UAB Blazers
 UC Davis,UC Davis Aggies
@@ -192,3 +207,4 @@ Wichita State,Wichita State Shockers
 Wisconsin,Wisconsin Badgers
 Wyoming,Wyoming Cowboys
 Xavier,Xavier Musketeers
+Yale,
