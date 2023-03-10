@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 
+from sportsbooks import utils
+
 HEADERS_PINNY = headers = {
     'authority': 'guest.api.arcadia.pinnacle.com',
     'accept': 'application/json',
@@ -19,7 +21,7 @@ HEADERS_PINNY = headers = {
     'x-api-key': 'CmX2KcMrXuFmNg6YFbmTxE0y9CIrOi0R',
 }
 
-URL_PINNY = 'https://guest.api.arcadia.pinnacle.com/0.1/leagues/'
+URL_PINNY = 'https://guest.api.arcadia.pinnacle.com/0.1/'
 
 class Pinnacle:
     '''
@@ -27,37 +29,42 @@ class Pinnacle:
     '''
     def __init__(self, league):
         self.league = league
-        self.df__matchups = None
-        self.df__straight = None
+        self.league_id = None
+        self.matchups = None
+        self.prices = None
         self.df = None
-        
-    @staticmethod
-    def _get(url):
-        return requests.get(
-            url,
-            headers=HEADERS_PINNY
-        )
-    
-    def _get_league_id(self):
-        '''
-        Convert human-readable league designations into appropriate Pinnacle League IDs'
-        '''
-        if self.league == 'NBA':
-            return 487
-        elif self.league == 'NCAA':
-            return 493
-    
+
+    def get_data(self):
+        """
+        Get lines data from Pinnacle and wrangle to proper data model.
+        """
+        self._league_logic()
+
+        if not self.league_id:
+            print(f"We don't currently support {self.league}.")
+            self.df = utils.empty_dataframe()
+
+        else:
+            self._get_matchups()
+            self._get_prices()
+
+            self.df = (
+                pd.DataFrame(self.matchups)
+                .merge(
+                    pd.DataFrame(self.prices),
+                    on=['matchup_id', 'designation'],
+                    how='outer'
+                )
+            )
+
     def _get_matchups(self):
-        '''
-        Get list of games and teams on offer.
-        '''
-        league_id = self._get_league_id()
-        
-        url = URL_PINNY + f"{league_id}/matchups?brandId=0"
-        
+
         matchups = []
-        
-        response = self._get(url)
+
+        response = requests.get(
+            url=f"{URL_PINNY}leagues/{self.league_id}/matchups?brandId=0",
+            headers=HEADERS_PINNY,
+        )
 
         for item in response.json():
             if item['type'] == "matchup":
@@ -76,21 +83,32 @@ class Pinnacle:
 
                     matchups.append(dict(row, **details))
 
-        self.df__matchups = pd.DataFrame(matchups)
-        
-     
+        self.matchups = matchups
+
+    def _get_prices(self):
+        prices = []
+
+        matchup_ids = {
+            x['matchup_id'] for x in self.matchups
+        } ## Every matchup_id has two rows, one for each participant.
+
+        for matchup_id in matchup_ids:
+            response = requests.get(
+                url=f"{URL_PINNY}matchups/{matchup_id}/markets/related/straight",
+                headers=HEADERS_PINNY,
+            )
+
+            [prices.append(market) for market in self._parse_spread(response)]
+
+        self.prices = prices
+
     def _parse_spread(self, response):
-        '''
-        Parse the point spread and prices from the Pinnacle "Straight" endpoint.
-        '''
         markets = []
-        
-        ##TODO: Switch logic for other market types
 
         for item in response.json():
             if (
                 ## Includes only handicap style markets
-                item['type'] == 'spread' and 
+                item['type'] == 'spread' and
                 ## Includes only full-game handicaps
                 item['key'].split(';')[1] == '0'
             ):
@@ -102,6 +120,7 @@ class Pinnacle:
                 }
 
                 for limit in item['limits']:
+                    ## Get betting limits for the market: this is the number of dollars you can place on a bet, it changes with time.
                     if limit['type'] == 'maxRiskStake':
                         row.update({'max_risk_stake': limit['amount']})
 
@@ -110,32 +129,14 @@ class Pinnacle:
                     markets.append(dict(row, **price))
 
         return markets
-    
-    def _get_spreads(self):
-        straight = []
-        
-        matchup_ids = self.df__matchups.matchup_id.unique().tolist()
-        
-        for matchup_id in matchup_ids:
-            url = f'https://guest.api.arcadia.pinnacle.com/0.1/matchups/{matchup_id}/markets/related/straight'
-            response = self._get(url)
-            [
-                straight.append(market) for market
-                in self._parse_spread(response)
-            ]
-            
-        self.df__straight = pd.DataFrame(straight)
-        
-    def get_data(self):
-        self._get_matchups()
-        self._get_spreads()
-        
-        self.df = (
-            self.df__matchups
-            .merge(
-                self.df__straight,
-                on=['matchup_id', 'designation'],
-                how='outer'
-            )
-        )
-    
+
+    def _league_logic(self):
+        '''
+        Translate league name into API league_id
+        '''
+        if self.league == 'NBA':
+            self.league_id = 487
+        elif self.league == 'NCAA':
+            self.league_id = 493
+        else:
+            self.league_id = None

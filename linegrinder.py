@@ -1,62 +1,41 @@
 import argparse
-import matplotlib.pyplot as plt
-import pandas as pd
 import pendulum
 import sys
 sys.path.append('..')
 
 from sportsbooks import (
     pinnacle,
-    draftkings,
     pointsbet,
-    caesers,
-    betmgm,
-    wynn
 )
 
 from calculator import Calculator
 
 def right_now():
+    """
+    Return the current time.
+    """
     return str(pendulum.now()).split('.')[0].replace('T', ' ')
 
 def main():
-    
+    """
+    Find 'Off Market' lines, calculate estimated ROI%.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", default="NBA")
     args = parser.parse_args()
     print(f"Getting data for {args.league}")
 
 
-    league=487
-    pinny = pinnacle.Pinnacle(league=league)
-
+    pinny = pinnacle.Pinnacle(league=args.league)
     print('Getting Pinnacle Lines...')
     pinny.get_data()
 
-    dkng = draftkings.DraftKings(
-        league=league, 
-        category_id=4606
-    )
-
-    print('Getting DraftKings Lines...')
-    dkng.get_data()
-
-    pb = pointsbet.PointsBet()
+    pb = pointsbet.PointsBet(league=args.league)
     print('Getting PointsBet Lines...')
-    
     pb.get_data()
-    
-    print('Getting Caesers Lines...')
-    czr = caesers.Caesers()
-    czr.get_data()
-    
-    print('Getting BetMGM Lines...')
-    mgm = betmgm.BetMGM()
-    mgm.get_data()
 
-    
     print('Returning ROI Calculations:')
-    
+
     pricing_spine = (
         pinny.df
         .assign(
@@ -67,26 +46,8 @@ def main():
     )
 
     retail_books = (
-        dkng.df
-        .assign(
-            DraftKings = lambda x: x['price'].apply(Calculator.convert_american_to_decimal)
-        )
-        [['participant_name', 'points', 'DraftKings']]
-         .merge(
-            pb.df.rename(columns={'odds_decimal': 'PointsBet'}),
-            how='outer',
-            on=['participant_name', 'points']
-        )
-        .merge(
-            czr.df.rename(columns={'price': 'Caesers'}),
-            how='outer',
-            on=['participant_name', 'points']
-        ) 
-        .merge(
-            mgm.df.rename(columns={'price': 'BetMGM'}),
-            how='outer',
-            on=['participant_name', 'points']
-        ) 
+        pb.df
+        .rename(columns={'odds_decimal': 'PointsBet'})
         .melt(
             id_vars=['participant_name', 'points'],
             var_name='book',

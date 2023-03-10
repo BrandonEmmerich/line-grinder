@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import requests
 
@@ -20,86 +19,112 @@ HEADERS_POINTSBET = {
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
 }
 
+URL_POINTSBET = "https://api.ny.pointsbet.com/api"
+
 class PointsBet:
     '''
     PointsBet
     '''
-    def __init__(self):
-        self.events = None
+    def __init__(self, league):
+        self.league = league
+        self.league_id = None
         self.matchups = None
-        self.df__raw = None 
-        
-    @staticmethod
-    def _get(url):
-        return requests.get(
-            url,
-            headers=HEADERS_POINTSBET
-        )
+        self.prices = None
+        self.df = None
+
+    def get_data(self):
+        """
+        Get lines data from PointsBet and wrangle to proper data model.
+        """
+        self._league_logic()
+
+        if not self.league_id:
+            print(f"We don't currently support {self.league}.")
+            self.df = utils.empty_dataframe()
+
+        else:
+            self._get_matchups()
+            self._get_prices()
+
+            if len(self.prices) == 0:
+                ## Sometimes there are no alternate lines
+                print('No alternate lines for PointsBet.')
+                self.df = utils.empty_dataframe()
+
+            else:
+
+                self.df = (
+                    pd.DataFrame(self.prices)
+                    .assign(label_pointsbet = lambda x: x['name'].apply(utils.clean_name))
+                    .merge(
+                        utils.get_mapping(self.league), ## Map PointsBet names to master list.
+                        on='label_pointsbet',
+                    )
+                    [['participant_name', 'points', 'price']]
+                )
+
+    def _league_logic(self):
+        '''
+        Translate league name into API league_id
+        '''
+        if self.league == 'NBA':
+            self.league_id = 105
+        elif self.league == 'NCAA':
+            self.league_id = 21
+        else:
+            self.league_id = None
 
     def _get_matchups(self):
-        url = 'https://api.ny.pointsbet.com/api/v2/competitions/105/events/featured?includeLive=false&page=1'
-        response = self._get(url)
-
+        """
+        Paginate through Pointsbet to get list of all matchups.
+        """
+        page_number = 1
         matchups = []
 
-        for item in response.json()['events']:
-            if item['isLive'] == False:
-                ## Exclude in-game betting for now.
-                row = {
-                    'competition_key': item['key'],
-                    'competition_name': item['name'],
-                    'start_time': item['startsAt']
-                }
-                matchups.append(row)
+        while True:
+
+            response = requests.get(
+                url=f"{URL_POINTSBET}/v2/competitions/{self.league_id}/events/featured?includeLive=false&page={page_number}",
+                headers=HEADERS_POINTSBET,
+            )
+
+            for item in response.json()['events']:
+                if not item['isLive']:
+                    ## Exclude in-game betting for now.
+                    row = {
+                        'competition_key': item['key'],
+                        'competition_name': item['name'],
+                        'start_time': item['startsAt']
+                    }
+                    matchups.append(row)
+
+            if response.json().get('nextPage'):
+                page_number = response.json().get('nextPage')
+            else:
+                break
 
         self.matchups = matchups
-       
-        
-    def get_data(self):
-        
-        self._get_matchups()
-        self._get_alt_lines()
-        
-        if self.df__raw.shape == (0,0):
-            ## Sometimes there are no alternate lines for Caesers
-            print('No alternate lines for PointsBet.')
-            self.df = utils.empty_dataframe()
-        
-        else:
-        
-            self.df = (
-                self.df__raw
-                .assign(
-                    label_pointsbet = lambda x: x['name'].apply(utils.clean_name)
-                )
-                .merge(
-                    utils.get_mapping(),
-                    on='label_pointsbet',
-                )
-                .assign(
-                    odds_decimal = lambda x: x['price'],
-                )
-                [['participant_name', 'points', 'odds_decimal']]
-            )
-        
-    def _get_alt_lines(self):
-        lines = []
-        
+
+    def _get_prices(self):
+        """
+        For each matchup, get the market prices.
+        """
+        prices = []
+
         for matchup in self.matchups:
-            try:
-                matchup_id = matchup['competition_key']
-                url = f'https://api.ny.pointsbet.com/api/mes/v3/events/{matchup_id}'
-                response = self._get(url)
+            matchup_id = matchup['competition_key']
 
+            response = requests.get(
+                url=f"{URL_POINTSBET}/mes/v3/events/{matchup_id}",
+                headers=HEADERS_POINTSBET,
+            )
 
-                for market in response.json()['fixedOddsMarkets']:
-                    if market['eventName'] == 'Pick Your Own Line':
-                        outcomes = market['outcomes']
-                        for outcome in outcomes:
-                            lines.append(outcome)
-            
-            except Exception as e:
-                print(f'Error with PointsBet: {e}')
-                        
-        self.df__raw = pd.DataFrame(lines)
+            for market in response.json()['fixedOddsMarkets']:
+                if (
+                    market['eventName'] == 'Pick Your Own Line'
+                ):  ## Get the alternate spreads
+                    outcomes = market['outcomes']
+                    for outcome in outcomes:
+                        prices.append(outcome)
 
+        self.prices = prices

@@ -1,2 +1,4 @@
 tabulate
 requests[security]
+pylint
+black

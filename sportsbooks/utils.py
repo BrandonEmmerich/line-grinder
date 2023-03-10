@@ -1,15 +1,15 @@
 import os
 import pandas as pd
 
-def get_mapping():
+def get_mapping(league):
     '''
     Get the mapping dataframe that connects team names between the sports books.
     '''
     if 'analysis' in os.getcwd():
-        mapping_path = '../data/mapping.csv'
+        mapping_path = f"../data/mapping__{league}.csv"
 
     else:
-        mapping_path = 'data/mapping.csv'
+        mapping_path = f"data/mapping__{league}.csv"
 
     return pd.read_csv(mapping_path)
 
