@@ -6,6 +6,7 @@ sys.path.append('..')
 from sportsbooks import (
     pinnacle,
     pointsbet,
+    draftkings,
 )
 
 from calculator import Calculator
@@ -25,7 +26,6 @@ def main():
     args = parser.parse_args()
     print(f"Getting data for {args.league}")
 
-
     pinny = pinnacle.Pinnacle(league=args.league)
     print('Getting Pinnacle Lines...')
     pinny.get_data()
@@ -33,6 +33,11 @@ def main():
     pb = pointsbet.PointsBet(league=args.league)
     print('Getting PointsBet Lines...')
     pb.get_data()
+
+    dkng = draftkings.DraftKings(league=args.league)
+    print('Getting DraftKings Lines...')
+    dkng.get_data()
+
 
     print('Returning ROI Calculations:')
 
@@ -46,8 +51,12 @@ def main():
     )
 
     retail_books = (
-        pb.df
-        .rename(columns={'odds_decimal': 'PointsBet'})
+        pb.df.rename(columns={'price': 'PointsBet'})
+        .merge(
+            dkng.df.rename(columns={'odds_decimal': 'DraftKings'}),
+            how='outer',
+            on=['participant_name', 'points']
+        )
         .melt(
             id_vars=['participant_name', 'points'],
             var_name='book',
