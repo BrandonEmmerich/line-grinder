@@ -44,21 +44,28 @@ class DraftKings:
 
         else:
             self._get_response()
-            self._get_prices()
 
-            self.df = (
-                pd.DataFrame(self.prices)
-                .merge(
-                    utils.get_mapping(self.league),
-                    left_on='label',
-                    right_on='label_draftkings'
+            if self.response.status_code != 200:
+                print('No alt lines for DraftKings.')
+                self.df = utils.empty_dataframe()
+
+            else:
+
+                self._get_prices()
+
+                self.df = (
+                    pd.DataFrame(self.prices)
+                    .merge(
+                        utils.get_mapping(self.league),
+                        left_on='label',
+                        right_on='label_draftkings'
+                    )
+                    .assign(
+                        price = lambda x: x['oddsDecimal'],
+                        points = lambda x: x['line']
+                    )
+                    [['participant_name', 'points', 'price']]
                 )
-                .assign(
-                    price = lambda x: x['oddsDecimal'],
-                    points = lambda x: x['line']
-                )
-                [['participant_name', 'points', 'price']]
-            )
 
     def _get_response(self):
         url = f"""https://sportsbook-us-ny.draftkings.com//sites/US-NY-SB/api/v5/eventgroups/{self.event_group}/categories/487/subcategories/{self.sub_category}"""
