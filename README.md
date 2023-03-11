@@ -1,13 +1,13 @@
 # Line Grinder
 
-A reductive mental model of the sportsbetting industry is this: there are two kinds of sports books - market makers and retail books. The market makers, like [Pinnacle](https://www.pinnacle.com/en/), have accurate lines and the lines from retail books are mostly right but occasionally wrong. 
+A reductive mental model of the sportsbetting industry is this: there are two kinds of sports books - market makers and retail books. The market makers, like [Pinnacle](https://www.pinnacle.com/en/), have accurate lines and the lines from retail books are mostly right but occasionally wrong.
 
 A simple but profitable sports betting strategy is to look for retail lines that differ from market maker lines and bet into them. In the 80's, bookies offered basically only a single point spread per game. Now, the competition for market share has spurred the retail books to offer a smorgesborg of betting products: alternate lines, player props, futures, etc. This large attack surface is hard to maintain and it will contain lines that are wrong.
 
 Finding these "off lines" is essentially a webscraping problem followed by a simple math problem. This module does both for you.
 
 ```
-python3 linegrinder.py
+python3 linegrinder.py --league NBA
 ```
 
 ![alt text](data/example.png "Title")
@@ -23,8 +23,8 @@ Oh, one more thing. Nothing in here is financial advice. My lawyers want you to 
 > *This program is 100% for entertainment purposes only and does not involve real money betting. If you or someone you know has a gambling problem and wants help, call 1-800-GAMBLER. This service is intended for adult users only.*
 
 #### TOTO
-    - Add more retail books: FanDuel, BetRivers, BarStool
+    - Add more retail books: FanDuel, BetRivers, BarStool, Wynn
     - Increase execution speed
-    - Add more leagues: NCAAM
+    - Add more leagues
     - Add more markets: currently, we only look for alternate spreads. We should also look at alternate totals, moneyline markets, and player props.
     - Create a front-end application.

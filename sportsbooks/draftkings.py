@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import requests
 
@@ -25,61 +24,81 @@ class DraftKings:
     '''
     DraftKings
     '''
-    def __init__(self, league, category_id):
+    def __init__(self, league):
         self.league = league
-        self.category_id = category_id
-        self.response__alt_lines = None
-        self.df__raw = None
+        self.sub_category = None
+        self.event_group = None
+        self.response = None
+        self.prices = None
+        self.df = None
 
+    def get_data(self):
+        """
+        Get lines data from DraftKings and wrangle to proper data model.
+        """
+        self._league_logic()
 
-    def _hit_endpoints(self):
-        self.response__alt_lines = requests.get(
-            f'https://sportsbook-us-ny.draftkings.com//sites/US-NY-SB/api/v5/eventgroups/42648/categories/{self.league}/subcategories/{self.category_id}',
+        if not self.sub_category:
+            print(f"We don't currently support {self.league}.")
+            self.df = utils.empty_dataframe()
+
+        else:
+            self._get_response()
+            self._get_prices()
+
+            self.df = (
+                pd.DataFrame(self.prices)
+                .merge(
+                    utils.get_mapping(self.league),
+                    left_on='label',
+                    right_on='label_draftkings'
+                )
+                .assign(
+                    price = lambda x: x['oddsDecimal'],
+                    points = lambda x: x['line']
+                )
+                [['participant_name', 'points', 'price']]
+            )
+
+    def _get_response(self):
+        url = f"""https://sportsbook-us-ny.draftkings.com//sites/US-NY-SB/api/v5/eventgroups/{self.event_group}/categories/487/subcategories/{self.sub_category}"""
+
+        self.response = requests.get(
+            url=url,
             headers=HEADERS_DRAFTKINGS,
             params=PARAMS
         )
 
-    def _unpack_json(self):
-        if not self.response__alt_lines.json().get('eventGroup'):
+    def _get_prices(self):
+        if not self.response.json().get('eventGroup'):
             print('No alt lines for DraftKings.')
-            self.df__raw = utils.empty_dataframe()
-            
-        else:
-        
-            games = self.response__alt_lines.json()['eventGroup']['offerCategories'][0]['offerSubcategoryDescriptors'][1]['offerSubcategory']['offers']
+            self.df = utils.empty_dataframe()
 
-            lines = []
+        else:
+            games = [
+                x for x in self.response.json()['eventGroup']['offerCategories'][0]['offerSubcategoryDescriptors']
+                if x['name'] == 'Alternate Spread' ## Only get Alternate Spreads, Ignore Alternate Totals, and Halftime/Fulltime splits.
+            ][0]['offerSubcategory']['offers']
+
+            prices = []
 
             for game in games:
                 outcomes = game[0]['outcomes']
                 for outcome in outcomes:
-                    lines.append(outcome)
+                    prices.append(outcome)
 
-            self.df__raw = pd.DataFrame(lines)
-        
-    def _get_alt_lines(self):
-        self._hit_endpoints()
-        self._unpack_json()
-        
-    def get_data(self):
+            self.prices = prices
 
-        self._hit_endpoints()
-        self._unpack_json()
-        
-        self.df = (
-            self.df__raw
-            .merge(
-                utils.get_mapping(),
-                left_on='label',
-                right_on='label_draftkings'
-            )
-            .assign(
-                price = lambda x: x['oddsAmerican'].astype(int),
-                points = lambda x: x['line']
-            )
-            [['participant_name', 'points', 'price']]
-        )
-        
-        
-        
-
+    def _league_logic(self):
+        '''
+        Translate league name into API league_id
+        '''
+        if self.league == 'NBA':
+            self.sub_category = 4606
+            self.event_group = 42648
+        elif self.league == 'NCAA':
+            self.sub_category = 10317
+            self.event_group = 92483
+        else:
+            self.sub_category = None
+            self.event_group = None

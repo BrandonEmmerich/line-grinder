@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import requests
 
@@ -22,36 +21,69 @@ HEADERS_BETMGM = {
     'x-from-product': 'sports',
 }
 
-URL_BETMGM = 'https://sports.ny.betmgm.com/en/sports/api/widget?layoutSize=Small&page=CompetitionLobby&sportId=7&regionId=9&competitionId=6004&compoundCompetitionId=1:6004&forceFresh=1'
-
 class BetMGM:
     '''
     BetMGM
     '''
-    def __init(self):
+    def __init__(self, league):
+        self.league = league
+        self.competition_id = None
         self.response = None
         self.lines = None
         self.df = None
-        
+
+    def get_data(self):
+        '''
+        Get lines data from BetMGM and wrangle to proper data model.
+        '''
+        self._league_logic()
+
+        if not self.competition_id:
+            print(f"We don't currently support {self.league}.")
+            self.df = utils.empty_dataframe()
+
+        self._get_response()
+        self._get_lines()
+
+        if self.lines == []:
+            self.df = utils.empty_dataframe()
+
+        else:
+            self.df = (
+                pd.DataFrame(self.lines)
+                .assign(
+                    label_betmgm = lambda x: x['result_name'].apply(utils.clean_name),
+                    price = lambda x: x['decimal_odds'],
+                    points = lambda x: x['points'].apply(utils.clean_points),
+                 )
+                .merge(
+                    utils.get_mapping(league=self.league),
+                    on='label_betmgm',
+                    how='left'
+                )
+                [['participant_name', 'points', 'price']]
+            )
+
+
     def _get_response(self):
         self.response = requests.get(
-            url=URL_BETMGM,
+            url = f'https://sports.ny.betmgm.com/en/sports/api/widget?layoutSize=Small&page=CompetitionLobby&sportId=7&regionId=9&competitionId={self.competition_id}&compoundCompetitionId=1:{self.competition_id}&forceFresh=1',
             headers=HEADERS_BETMGM,
         )
-        
+
     def _get_lines(self):
         '''
         Get the alternate spread lines from the response JSON.
         '''
         lines = []
-        
+
         # This is where the game information are stored
         if not self.response.json()['widgets'][3]['payload'].get('items'):
             print('No data for BetMGM')
             self.lines = []
-            
+
         else:
-        
+
             fixtures = self.response.json()['widgets'][3]['payload']['items'][0]['activeChildren'][0]['payload']['fixtures']
 
             for fixture in fixtures:
@@ -61,7 +93,7 @@ class BetMGM:
                 }
 
                 spreads = [
-                    game for game in fixture['games'] 
+                    game for game in fixture['games']
                     if game['name']['value'] == 'Spread'
                 ]
 
@@ -80,30 +112,13 @@ class BetMGM:
 
             self.lines = lines
 
-    
-    def get_data(self):
+    def _league_logic(self):
         '''
-        Get Alt lines data from BetMGM.
+        Translate league name into API league_id
         '''
-        self._get_response()
-        self._get_lines()
-        
-        if self.lines == []:
-            self.df = utils.empty_dataframe()
-            
+        if self.league == 'NBA':
+            self.competition_id = 6004
+        elif self.league == 'NCAA':
+            self.competition_id = 264
         else:
-        
-            self.df = (
-                pd.DataFrame(self.lines)
-                .assign(
-                    label_betmgm = lambda x: x['result_name'].apply(utils.clean_name),
-                    price = lambda x: x['decimal_odds'],
-                    points = lambda x: x['points'].apply(utils.clean_points),
-                 )
-                .merge(
-                    utils.get_mapping(),
-                    on='label_betmgm',
-                    how='left'
-                )
-                [['participant_name', 'points', 'price']]
-            )
+            self.competition_id = None
