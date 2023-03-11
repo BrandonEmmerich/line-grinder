@@ -8,6 +8,7 @@ from sportsbooks import (
     pointsbet,
     draftkings,
     caesers,
+    betmgm,
 )
 
 from calculator import Calculator
@@ -43,6 +44,10 @@ def main():
     print('Getting Caesers Lines...')
     czr.get_data()
 
+    mgm = betmgm.BetMGM(league=args.league)
+    print('Getting BetMGM Lines...')
+    mgm.get_data()
+
     print('Returning ROI Calculations:')
 
     pricing_spine = (
@@ -63,6 +68,11 @@ def main():
         )
         .merge(
             czr.df.rename(columns={'price': 'Caesers'}),
+            how='outer',
+            on=['participant_name', 'points']
+        )
+        .merge(
+            mgm.df.rename(columns={'price': 'BetMGM'}),
             how='outer',
             on=['participant_name', 'points']
         )
