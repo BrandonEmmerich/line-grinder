@@ -52,6 +52,7 @@ def main():
 
     pricing_spine = (
         pinny.df
+        .query('is_live == False')
         .assign(
             raw_probability = lambda x: x['price'].apply(Calculator.get_implied_probability),
             vig_free_probability = lambda x: x['raw_probability'] / x.groupby(['matchup_id', 'key'])['raw_probability'].transform('sum')
