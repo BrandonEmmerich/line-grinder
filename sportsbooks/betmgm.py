@@ -77,8 +77,11 @@ class BetMGM:
         '''
         lines = []
 
-        # This is where the game information are stored
-        if not self.response.json()['widgets'][3]['payload'].get('items'):
+        if len(self.response.json()['widgets']) < 4:
+            print('No data for BetMGM')
+            self.lines = []
+
+        elif not self.response.json()['widgets'][3]['payload'].get('items'):
             print('No data for BetMGM')
             self.lines = []
 
