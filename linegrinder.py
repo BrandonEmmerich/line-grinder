@@ -24,7 +24,8 @@ def main():
     Find 'Off Market' lines, calculate estimated ROI%.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--league", default="NBA")
+    parser.add_argument("--league", default="NBA", help="Choose sports league for which to collect data; e.g. NBA, NCAA, etc")
+    parser.add_argument("--verbose", default=True, help="If True, show all retail prices for top ROI bet suggested")
     args = parser.parse_args()
     print(f"Getting data for {args.league}")
 
@@ -106,6 +107,31 @@ def main():
 
     print(right_now())
     print(ROI.head(15).to_markdown(index=False))
+
+    if args.verbose:
+        show_all_retail_books(ROI, retail_books)
+
+def show_all_retail_books(ROI, retail_books):
+    '''
+    Show all retail book prices for top-ROI bet.
+    '''
+
+    participant_name = ROI.to_dict('records')[0]['participant_name']
+    points = ROI.to_dict('records')[0]['points']
+
+    print(
+        retail_books
+        .query(f"participant_name == '{participant_name}'")
+        .query(f'points == {points}')
+        .assign(
+            price = lambda x: x['Decimal Odds'].apply(Calculator.convert_decimal_to_american).transform(lambda s: round(s))
+        )
+        .sort_values(
+            by='Decimal Odds',
+            ascending=False
+        )
+        .to_markdown(index=False)
+    )
 
 if __name__ == "__main__":
     main()
