@@ -1,7 +1,7 @@
 participant_name,label_pointsbet,label_draftkings,label_caesers,label_betmgm
 Air Force,Air Force Falcons,Air Force,Air Force,Air Force
 Akron,Akron Zips,Akron,Akron,Akron
-Alabama,,Alabama,Alabama,Alabama
+Alabama,Alabama,Alabama,Alabama,Alabama
 Alabama A&M,Alabama A&M Bulldogs,Alabama A&M,Alabama A&M,Alabama A&M
 Alcorn State,Alcorn State Braves,Alcorn State,Alcorn State,Alcorn State
 Arizona,Arizona Wildcats,Arizona,Arizona,Arizona
@@ -61,7 +61,7 @@ Gonzaga,Gonzaga Bulldogs,Gonzaga,Gonzaga,Gonzaga
 Grambling,Grambling St Tigers,Grambling,Grambling,Grambling
 Grand Canyon,Grand Canyon Antelopes,Grand Canyon,Grand Canyon,Grand Canyon
 Hawaii,Hawaii Rainbow Warriors,Hawaii,Hawaii,Hawaii
-Houston,,Houston,Houston,Houston
+Houston,Houston,Houston,Houston,Houston
 Howard,Howard Bison,Howard,Howard,Howard
 Illinois,Illinois Fighting Illini,Illinois,Illinois,Illinois
 Indiana,Indiana Hoosiers,Indiana,Indiana,Indiana
@@ -131,9 +131,9 @@ Pennsylvania,,Pennsylvania,Pennsylvania,Pennsylvania
 Penn State,Penn State Nittany Lions,Penn State,Penn State,Penn State
 Pittsburgh,Pittsburgh Panthers,Pittsburgh,Pittsburgh,Pittsburgh
 Prairie View A&M,Prairie View A&M Panthers,Prairie View A&M,Prairie View A&M,Prairie View A&M
-Princeton,,Princeton,Princeton,Princeton
+Princeton,Princeton Tigers,Princeton,Princeton,Princeton
 Providence,Providence Friars,Providence,Providence,Providence
-Purdue,,Purdue,Purdue,Purdue
+Purdue,Purdue,Purdue,Purdue,Purdue
 Quinnipiac,,Quinnipiac,Quinnipiac,Quinnipiac
 Rice,Rice Owls,Rice,Rice,Rice
 Richmond,Richmond Spiders,Richmond,Richmond,Richmond
@@ -207,4 +207,4 @@ Wichita State,Wichita State Shockers,Wichita State,Wichita State,Wichita State
 Wisconsin,Wisconsin Badgers,Wisconsin,Wisconsin,Wisconsin
 Wyoming,Wyoming Cowboys,Wyoming,Wyoming,Wyoming
 Xavier,Xavier Musketeers,Xavier,Xavier,Xavier
-Yale,,Yale,Yale,Yale
+Yale,Yale,Yale,Yale,Yale
