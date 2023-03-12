@@ -116,22 +116,27 @@ def show_all_retail_books(ROI, retail_books):
     Show all retail book prices for top-ROI bet.
     '''
 
-    participant_name = ROI.to_dict('records')[0]['participant_name']
-    points = ROI.to_dict('records')[0]['points']
+    if ROI.shape[0] == 0:
+        print(f"There are no lines.")
 
-    print(
-        retail_books
-        .query(f"participant_name == '{participant_name}'")
-        .query(f'points == {points}')
-        .assign(
-            price = lambda x: x['Decimal Odds'].apply(Calculator.convert_decimal_to_american).transform(lambda s: round(s))
+    else:
+
+        participant_name = ROI.to_dict('records')[0]['participant_name']
+        points = ROI.to_dict('records')[0]['points']
+
+        print(
+            retail_books
+            .query(f"participant_name == '{participant_name}'")
+            .query(f'points == {points}')
+            .assign(
+                price = lambda x: x['Decimal Odds'].apply(Calculator.convert_decimal_to_american).transform(lambda s: round(s))
+            )
+            .sort_values(
+                by='Decimal Odds',
+                ascending=False
+            )
+            .to_markdown(index=False)
         )
-        .sort_values(
-            by='Decimal Odds',
-            ascending=False
-        )
-        .to_markdown(index=False)
-    )
 
 if __name__ == "__main__":
     main()
