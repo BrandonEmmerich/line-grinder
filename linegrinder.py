@@ -9,6 +9,7 @@ from sportsbooks import (
     draftkings,
     caesers,
     betmgm,
+    betrivers,
 )
 
 from calculator import Calculator
@@ -49,6 +50,10 @@ def main():
     print('Getting BetMGM Lines...')
     mgm.get_data()
 
+    kambi = betrivers.BetRivers(league=args.league)
+    print('Getting BetRivers...')
+    kambi.get_data()
+
     print('Returning ROI Calculations:')
 
     pricing_spine = (
@@ -75,6 +80,11 @@ def main():
         )
         .merge(
             mgm.df.rename(columns={'price': 'BetMGM'}),
+            how='outer',
+            on=['participant_name', 'points']
+        )
+        .merge(
+            kambi.df.rename(columns={'price': 'BetRivers'}),
             how='outer',
             on=['participant_name', 'points']
         )
